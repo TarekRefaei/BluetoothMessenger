@@ -4,6 +4,7 @@
     package="com.tarekrefaei.bluetoothmessenger">
 
     <application
+        android:name=".BluetoothMessengerApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
