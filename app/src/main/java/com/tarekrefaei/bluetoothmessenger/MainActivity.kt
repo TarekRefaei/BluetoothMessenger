@@ -38,17 +38,24 @@ class MainActivity : ComponentActivity() {
         val permissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { perms ->
-            val canEnableBluetooth = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                perms[Manifest.permission.BLUETOOTH_CONNECT] == true
-            } else true
+            val canEnableBluetooth = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                perms[Manifest.permission.BLUETOOTH_CONNECT +
+                        Manifest.permission.BLUETOOTH +
+                        Manifest.permission.BLUETOOTH_SCAN +
+                        Manifest.permission.BLUETOOTH_ADMIN +
+                        Manifest.permission.ACCESS_COARSE_LOCATION] == true
+            } else {
+                perms[Manifest.permission.BLUETOOTH +
+                        Manifest.permission.ACCESS_COARSE_LOCATION +
+                        Manifest.permission.BLUETOOTH_ADMIN] == true
+            }
 
-            if(canEnableBluetooth && !isBluetoothEnabled) {
+            if (canEnableBluetooth && !isBluetoothEnabled) {
                 enableBluetoothLauncher.launch(
                     Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                 )
             }
         }
-
 
         setContent {
             BluetoothMessengerTheme {
