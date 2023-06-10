@@ -1,20 +1,20 @@
 package com.tarekrefaei.bluetoothmessenger.features.scanning.screen
 
 import android.Manifest
+import android.content.Context
 import android.os.Build
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,10 +29,26 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 fun BluetoothLeScanner(
     navController: NavHostController,
     permissionLauncher: ActivityResultLauncher<Array<String>>,
+    context: Context,
 ) {
 
     val viewModel = hiltViewModel<BluetoothViewModel>()
     val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(key1 = state.error) {
+        state.error?.let { message ->
+            Toast.makeText(
+                context, message, Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+    LaunchedEffect(key1 = state.isConnected) {
+        if (state.isConnected) {
+            Toast.makeText(
+                context, "Connected", Toast.LENGTH_LONG
+            ).show()
+        }
+    }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         permissionLauncher.launch(
@@ -43,34 +59,50 @@ fun BluetoothLeScanner(
         )
     }
 
-
-
-    Column {
-        BluetoothDeviceList(
-            scannedDevices = state.scannedDevices,
-            pairedDevices = state.pairedDevices,
-            onClick = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround
-        ) {
-            Button(
-                onClick = { viewModel.startScanning() }
+    when {
+        state.isConnecting -> {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Text(text = "Start Scan")
+                CircularProgressIndicator()
+                Text(text = "Connecting ...")
             }
-            Button(
-                onClick = { viewModel.stopScanning() }
-            ) {
-                Text(text = "Stop Scan")
+        }
+        else -> {
+            Column {
+                BluetoothDeviceList(
+                    scannedDevices = state.scannedDevices,
+                    pairedDevices = state.pairedDevices,
+                    onClick = viewModel::connectToDevice,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    Button(
+                        onClick = { viewModel.startScanning() }
+                    ) {
+                        Text(text = "Start Scan")
+                    }
+                    Button(
+                        onClick = { viewModel.stopScanning() }
+                    ) {
+                        Text(text = "Stop Scan")
+                    }
+                    Button(
+                        onClick = { viewModel.waitForIncomingConnection() }
+                    ) {
+                        Text(text = "Start Server")
+                    }
+                }
             }
         }
     }
-
 }
 
 @Composable
