@@ -49,6 +49,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        val context = applicationContext
 
         setContent {
             BluetoothMessengerTheme {
@@ -56,6 +57,7 @@ class MainActivity : ComponentActivity() {
                 Destinations(
                     navController = navController,
                     permissionLauncher = permissionLauncher,
+                    context = context
                 )
             }
         }

@@ -1,5 +1,6 @@
 package com.tarekrefaei.bluetoothmessenger
 
+import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
@@ -17,6 +18,7 @@ sealed class Screens(val route: String) {
 fun Destinations(
     navController: NavHostController,
     permissionLauncher: ActivityResultLauncher<Array<String>>,
+    context: Context,
 ) {
     NavHost(
         navController = navController,
@@ -30,7 +32,8 @@ fun Destinations(
         composable(route = Screens.ScanningScreen.route) {
             BluetoothLeScanner(
                 navController = navController,
-                permissionLauncher = permissionLauncher
+                permissionLauncher = permissionLauncher,
+                context = context,
             )
         }
     }
