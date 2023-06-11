@@ -1,4 +1,4 @@
-package com.tarekrefaei.bluetoothmessenger.features.scanning.domain
+package com.tarekrefaei.bluetoothmessenger.features.chat.domain
 
 data class BluetoothDeviceDomain(
     val name : String?,

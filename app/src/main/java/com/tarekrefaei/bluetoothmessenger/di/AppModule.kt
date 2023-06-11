@@ -1,8 +1,8 @@
 package com.tarekrefaei.bluetoothmessenger.di
 
 import android.content.Context
-import com.tarekrefaei.bluetoothmessenger.features.scanning.data.BluetoothControllerImpl
-import com.tarekrefaei.bluetoothmessenger.features.scanning.domain.BluetoothController
+import com.tarekrefaei.bluetoothmessenger.features.chat.data.BluetoothControllerImpl
+import com.tarekrefaei.bluetoothmessenger.features.chat.domain.BluetoothController
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
