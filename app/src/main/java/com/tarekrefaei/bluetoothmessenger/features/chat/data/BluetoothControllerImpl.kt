@@ -1,4 +1,4 @@
-package com.tarekrefaei.bluetoothmessenger.features.scanning.data
+package com.tarekrefaei.bluetoothmessenger.features.chat.data
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -6,9 +6,10 @@ import android.bluetooth.*
 import android.content.Context
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import com.tarekrefaei.bluetoothmessenger.features.scanning.domain.BluetoothController
-import com.tarekrefaei.bluetoothmessenger.features.scanning.domain.BluetoothDeviceDomain
-import com.tarekrefaei.bluetoothmessenger.features.scanning.domain.ConnectionResult
+import com.tarekrefaei.bluetoothmessenger.features.chat.domain.BluetoothController
+import com.tarekrefaei.bluetoothmessenger.features.chat.domain.BluetoothDeviceDomain
+import com.tarekrefaei.bluetoothmessenger.features.chat.domain.BluetoothMessage
+import com.tarekrefaei.bluetoothmessenger.features.chat.domain.ConnectionResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -33,6 +34,8 @@ class BluetoothControllerImpl(
     private val bluetoothAdapter by lazy {
         bluetoothManager?.adapter
     }
+
+    private var dataTransferService: BluetoothDataTransferService? = null
 
     private val foundDeviceReceiver = FoundDeviceReceiver { device ->
         _scannedDevices.update { devices ->
@@ -134,6 +137,18 @@ class BluetoothControllerImpl(
                 emit(ConnectionResult.ConnectionEstablished)
                 currentClientSocket?.let {
                     currentServerSocket?.close()
+                    val service = BluetoothDataTransferService(it)
+                    dataTransferService = service
+
+                    emitAll(
+                        service
+                            .listenForIncomingMessage()
+                            .map {
+                                ConnectionResult.TransferSucceeded(
+                                    it
+                                )
+                            }
+                    )
                 }
             }
         }.onCompletion {
@@ -164,6 +179,15 @@ class BluetoothControllerImpl(
                 try {
                     it.connect()
                     emit(ConnectionResult.ConnectionEstablished)
+
+                    BluetoothDataTransferService(socket = it).also {
+                        dataTransferService = it
+                        emitAll(
+                            it.listenForIncomingMessage().map {
+                                ConnectionResult.TransferSucceeded(it)
+                            }
+                        )
+                    }
                 } catch (e: IOException) {
                     it.close()
                     emit(ConnectionResult.Error(e.message.toString()))
@@ -173,6 +197,26 @@ class BluetoothControllerImpl(
         }.onCompletion {
             closeConnection()
         }.flowOn(Dispatchers.IO)
+    }
+
+    override suspend fun trySendMessage(message: String): BluetoothMessage? {
+        if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) {
+            return null
+        }
+
+        if (dataTransferService == null) {
+            return null
+        }
+
+        val bluetoothMessage = BluetoothMessage(
+            message = message,
+            senderName = bluetoothAdapter?.name ?: "Unknown Name",
+            isFromLocalUser = true
+        )
+
+        dataTransferService?.sendMessage(bluetoothMessage.toByteArray())
+
+        return bluetoothMessage
     }
 
     override fun closeConnection() {
@@ -195,7 +239,6 @@ class BluetoothControllerImpl(
         context.unregisterReceiver(bluetoothStateReceiver)
         closeConnection()
     }
-
 
     companion object {
         const val SERVICE_UUID = "3cbccd9b-36df-435f-8de2-2626c0d27e38"

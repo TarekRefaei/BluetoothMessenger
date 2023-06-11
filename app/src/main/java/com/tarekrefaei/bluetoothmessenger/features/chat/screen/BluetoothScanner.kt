@@ -1,4 +1,4 @@
-package com.tarekrefaei.bluetoothmessenger.features.scanning.screen
+package com.tarekrefaei.bluetoothmessenger.features.chat.screen
 
 import android.Manifest
 import android.content.Context
@@ -9,25 +9,26 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.tarekrefaei.bluetoothmessenger.features.scanning.domain.BluetoothDeviceDomain
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.tarekrefaei.bluetoothmessenger.features.chat.domain.BluetoothDeviceDomain
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BluetoothLeScanner(
-    navController: NavHostController,
     permissionLauncher: ActivityResultLauncher<Array<String>>,
     context: Context,
 ) {
@@ -69,6 +70,13 @@ fun BluetoothLeScanner(
                 CircularProgressIndicator()
                 Text(text = "Connecting ...")
             }
+        }
+        state.isConnected -> {
+            ChatScreen(
+                state = state,
+                onDisconnect = viewModel::disconnectFromDevice,
+                onSendMessage = viewModel::sendMessage
+            )
         }
         else -> {
             Column {

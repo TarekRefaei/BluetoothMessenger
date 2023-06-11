@@ -1,8 +1,8 @@
-package com.tarekrefaei.bluetoothmessenger.features.scanning.data
+package com.tarekrefaei.bluetoothmessenger.features.chat.data
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
-import com.tarekrefaei.bluetoothmessenger.features.scanning.domain.BluetoothDeviceDomain
+import com.tarekrefaei.bluetoothmessenger.features.chat.domain.BluetoothDeviceDomain
 
 @SuppressLint("MissingPermission")
 fun BluetoothDevice.toBluetoothDeviceDomain() : BluetoothDeviceDomain {

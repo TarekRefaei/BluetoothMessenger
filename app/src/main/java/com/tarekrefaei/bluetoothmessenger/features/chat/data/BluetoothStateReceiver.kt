@@ -1,4 +1,4 @@
-package com.tarekrefaei.bluetoothmessenger.features.scanning.data
+package com.tarekrefaei.bluetoothmessenger.features.chat.data
 
 import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
